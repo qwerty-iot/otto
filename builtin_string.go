@@ -512,10 +512,3 @@ func builtinString_endsWith(call FunctionCall) Value {
 	target := call.Argument(0).string()
 	return toValue_bool(strings.HasSuffix(value, target))
 }
-
-func builtinString_includes(call FunctionCall) Value {
-	checkObjectCoercible(call.runtime, call.This)
-	value := call.This.string()
-	target := call.Argument(0).string()
-	return toValue_bool(strings.Contains(value, target))
-}
