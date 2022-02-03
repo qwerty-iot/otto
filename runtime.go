@@ -489,7 +489,16 @@ func (self *_runtime) convertCallParameter(v Value, t reflect.Type) (reflect.Val
 					err = fmt.Errorf("couldn't convert property %q of %s: %s", k, t, verr.Error())
 					return false
 				}
-				m.SetMapIndex(reflect.ValueOf(k), v)
+				if v.IsNil() {
+					if mi, ok := m.Interface().(map[string]interface{}); ok {
+						mi[reflect.ValueOf(k).String()] = nil
+					} else {
+						err = fmt.Errorf("error setting nil %q of %s: not map[string]interface{}", k, t)
+						return false
+					}
+				} else {
+					m.SetMapIndex(reflect.ValueOf(k), v)
+				}
 				return true
 			})
 
