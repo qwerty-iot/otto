@@ -665,6 +665,29 @@ func _newContext(runtime *_runtime) {
 				call: builtinObject_getOwnPropertyNames,
 			},
 		}
+		assign_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 1,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "assign",
+				call: builtinObject_assign,
+			},
+		}
 		runtime.global.Object = &_object{
 			runtime:     runtime,
 			class:       "Function",
@@ -782,6 +805,13 @@ func _newContext(runtime *_runtime) {
 						value: getOwnPropertyNames_function,
 					},
 				},
+				"assign": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: assign_function,
+					},
+				},
 			},
 			propertyOrder: []string{
 				"length",
@@ -799,6 +829,7 @@ func _newContext(runtime *_runtime) {
 				"freeze",
 				"keys",
 				"getOwnPropertyNames",
+				"assign",
 			},
 		}
 		runtime.global.ObjectPrototype.property["constructor"] =
