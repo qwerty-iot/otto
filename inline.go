@@ -1629,6 +1629,107 @@ func _newContext(runtime *_runtime) {
 			}
 	}
 	{
+		slice_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"byteLength": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"byteLength",
+			},
+			value: _nativeFunctionObject{
+				name: "slice",
+				call: builtinArrayBuffer_slice,
+			},
+		}
+		runtime.global.ArrayBufferPrototype = &_object{
+			runtime:     runtime,
+			class:       "Object",
+			objectClass: _classObject,
+			prototype:   runtime.global.ObjectPrototype,
+			extensible:  true,
+			value:       nil,
+			property: map[string]_property{
+				"byteLength": _property{
+					mode: 0100,
+					value: Value{
+						kind:  valueNumber,
+						value: uint32(0),
+					},
+				},
+				"slice": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: slice_function,
+					},
+				},
+				/*"toString": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: toString_function,
+					},
+				},*/
+			},
+			propertyOrder: []string{
+				"byteLength",
+				"slice",
+				//"toString",
+			},
+		}
+		runtime.global.ArrayBuffer = &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			value: _nativeFunctionObject{
+				name:      "ArrayBuffer",
+				call:      builtinArrayBuffer,
+				construct: builtinNewArrayBuffer,
+			},
+			property: map[string]_property{
+				"byteLength": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 1,
+					},
+				},
+				"prototype": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueObject,
+						value: runtime.global.ArrayBufferPrototype,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"byteLength",
+				"prototype",
+			},
+		}
+		runtime.global.ArrayBufferPrototype.property["constructor"] =
+			_property{
+				mode: 0101,
+				value: Value{
+					kind:  valueObject,
+					value: runtime.global.ArrayBuffer,
+				},
+			}
+	}
+	{
 		toString_function := &_object{
 			runtime:     runtime,
 			class:       "Function",
@@ -6179,6 +6280,13 @@ func _newContext(runtime *_runtime) {
 					value: runtime.global.Array,
 				},
 			},
+			"ArrayBuffer": _property{
+				mode: 0101,
+				value: Value{
+					kind:  valueObject,
+					value: runtime.global.ArrayBuffer,
+				},
+			},
 			"String": _property{
 				mode: 0101,
 				value: Value{
@@ -6313,6 +6421,7 @@ func _newContext(runtime *_runtime) {
 			"Object",
 			"Function",
 			"Array",
+			"ArrayBuffer",
 			"String",
 			"Boolean",
 			"Number",
