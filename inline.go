@@ -4,6 +4,32 @@ import (
 	"math"
 )
 
+func _inlineFunction(runtime *_runtime, args int, name string, call _nativeFunction) *_object {
+	return &_object{
+		runtime:     runtime,
+		class:       "Function",
+		objectClass: _classObject,
+		prototype:   runtime.global.FunctionPrototype,
+		extensible:  true,
+		property: map[string]_property{
+			"length": _property{
+				mode: 0,
+				value: Value{
+					kind:  valueNumber,
+					value: args,
+				},
+			},
+		},
+		propertyOrder: []string{
+			"length",
+		},
+		value: _nativeFunctionObject{
+			name: name,
+			call: call,
+		},
+	}
+}
+
 func _newContext(runtime *_runtime) {
 	{
 		runtime.global.ObjectPrototype = &_object{
@@ -1636,7 +1662,7 @@ func _newContext(runtime *_runtime) {
 			prototype:   runtime.global.FunctionPrototype,
 			extensible:  true,
 			property: map[string]_property{
-				"byteLength": _property{
+				"length": _property{
 					mode: 0,
 					value: Value{
 						kind:  valueNumber,
@@ -1645,7 +1671,7 @@ func _newContext(runtime *_runtime) {
 				},
 			},
 			propertyOrder: []string{
-				"byteLength",
+				"length",
 			},
 			value: _nativeFunctionObject{
 				name: "slice",
@@ -1726,6 +1752,696 @@ func _newContext(runtime *_runtime) {
 				value: Value{
 					kind:  valueObject,
 					value: runtime.global.ArrayBuffer,
+				},
+			}
+	}
+	{
+		getInt8_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getInt8",
+				call: builtinDataView_getInt8,
+			},
+		}
+		getUint8_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getUint8",
+				call: builtinDataView_getUint8,
+			},
+		}
+		getInt16_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getInt16",
+				call: builtinDataView_getInt16,
+			},
+		}
+		getUint16_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getUint16",
+				call: builtinDataView_getUint16,
+			},
+		}
+		getInt32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getInt32",
+				call: builtinDataView_getInt32,
+			},
+		}
+		getUint32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getUint32",
+				call: builtinDataView_getUint32,
+			},
+		}
+		getBigInt64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getBigInt64",
+				call: builtinDataView_getBigInt64,
+			},
+		}
+		getBigUint64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getBigUint64",
+				call: builtinDataView_getBigUint64,
+			},
+		}
+		getFloat32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getFloat32",
+				call: builtinDataView_getFloat32,
+			},
+		}
+		getFloat64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "getFloat64",
+				call: builtinDataView_getFloat64,
+			},
+		}
+		setInt8_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setInt8",
+				call: builtinDataView_setInt8,
+			},
+		}
+		setUint8_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setUint8",
+				call: builtinDataView_setUint8,
+			},
+		}
+		setInt16_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setInt16",
+				call: builtinDataView_setInt16,
+			},
+		}
+		setUint16_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setUint16",
+				call: builtinDataView_setUint16,
+			},
+		}
+		setInt32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setInt32",
+				call: builtinDataView_setInt32,
+			},
+		}
+		setUint32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setUint32",
+				call: builtinDataView_setUint32,
+			},
+		}
+		setBigInt64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setBigInt64",
+				call: builtinDataView_setBigInt64,
+			},
+		}
+		setBigUint64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setBigUint64",
+				call: builtinDataView_setBigUint64,
+			},
+		}
+		setFloat32_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setFloat32",
+				call: builtinDataView_setFloat32,
+			},
+		}
+		setFloat64_function := &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			property: map[string]_property{
+				"length": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 2,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"length",
+			},
+			value: _nativeFunctionObject{
+				name: "setFloat64",
+				call: builtinDataView_setFloat64,
+			},
+		}
+		runtime.global.DataViewPrototype = &_object{
+			runtime:     runtime,
+			class:       "Object",
+			objectClass: _classObject,
+			prototype:   runtime.global.ObjectPrototype,
+			extensible:  true,
+			value:       nil,
+			property: map[string]_property{
+				"byteLength": _property{
+					mode: 0100,
+					value: Value{
+						kind:  valueNumber,
+						value: uint32(0),
+					},
+				},
+				"getInt8": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getInt8_function,
+					},
+				},
+				"getUint8": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getUint8_function,
+					},
+				},
+				"getInt16": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getInt16_function,
+					},
+				},
+				"getUint16": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getUint16_function,
+					},
+				},
+				"getInt32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getInt32_function,
+					},
+				},
+				"getUint32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getUint32_function,
+					},
+				},
+				"getBigInt64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getBigInt64_function,
+					},
+				},
+				"getBigUint64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getBigUint64_function,
+					},
+				},
+				"getFloat32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getFloat32_function,
+					},
+				},
+				"getFloat64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: getFloat64_function,
+					},
+				},
+				"setInt8": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setInt8_function,
+					},
+				},
+				"setUint8": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setUint8_function,
+					},
+				},
+				"setInt16": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setInt16_function,
+					},
+				},
+				"setUint16": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setUint16_function,
+					},
+				},
+				"setInt32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setInt32_function,
+					},
+				},
+				"setUint32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setUint32_function,
+					},
+				},
+				"setBigInt64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setBigInt64_function,
+					},
+				},
+				"setBigUint64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setBigUint64_function,
+					},
+				},
+				"setFloat32": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setFloat32_function,
+					},
+				},
+				"setFloat64": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: setFloat64_function,
+					},
+				},
+				/*"toString": _property{
+					mode: 0101,
+					value: Value{
+						kind:  valueObject,
+						value: toString_function,
+					},
+				},*/
+			},
+			propertyOrder: []string{
+				"byteLength",
+				"getInt8",
+				"getUint8",
+				"getInt16",
+				"getUint16",
+				"getInt32",
+				"getUint32",
+				"getBigInt64",
+				"getBigUint64",
+				"geFloat32",
+				"getFloat64",
+				"setInt8",
+				"setUint8",
+				"setInt16",
+				"setUint16",
+				"setInt32",
+				"setUint32",
+				"setBigInt64",
+				"setBigUint64",
+				"setFloat32",
+				"setFloat64",
+				//"toString",
+			},
+		}
+		runtime.global.DataView = &_object{
+			runtime:     runtime,
+			class:       "Function",
+			objectClass: _classObject,
+			prototype:   runtime.global.FunctionPrototype,
+			extensible:  true,
+			value: _nativeFunctionObject{
+				name:      "DataView",
+				call:      builtinDataView,
+				construct: builtinNewDataView,
+			},
+			property: map[string]_property{
+				"byteLength": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueNumber,
+						value: 1,
+					},
+				},
+				"prototype": _property{
+					mode: 0,
+					value: Value{
+						kind:  valueObject,
+						value: runtime.global.DataViewPrototype,
+					},
+				},
+			},
+			propertyOrder: []string{
+				"byteLength",
+				"prototype",
+			},
+		}
+		runtime.global.DataViewPrototype.property["constructor"] =
+			_property{
+				mode: 0101,
+				value: Value{
+					kind:  valueObject,
+					value: runtime.global.DataView,
 				},
 			}
 	}
@@ -6287,6 +7003,13 @@ func _newContext(runtime *_runtime) {
 					value: runtime.global.ArrayBuffer,
 				},
 			},
+			"DataView": _property{
+				mode: 0101,
+				value: Value{
+					kind:  valueObject,
+					value: runtime.global.DataView,
+				},
+			},
 			"String": _property{
 				mode: 0101,
 				value: Value{
@@ -6422,6 +7145,7 @@ func _newContext(runtime *_runtime) {
 			"Function",
 			"Array",
 			"ArrayBuffer",
+			"DataView",
 			"String",
 			"Boolean",
 			"Number",

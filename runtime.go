@@ -22,6 +22,7 @@ type _global struct {
 	Function       *_object // Function( ... ), new Function( ... ) - 1
 	Array          *_object // Array( ... ), new Array( ... ) - 1
 	ArrayBuffer    *_object // ArrayBuffer( ... ), new ArrayBuffer( ... ) - 1
+	DataView       *_object // DataView( ... ), new DataView( ... ) - 1
 	String         *_object // String( ... ), new String( ... ) - 1
 	Boolean        *_object // Boolean( ... ), new Boolean( ... ) - 1
 	Number         *_object // Number( ... ), new Number( ... ) - 1
@@ -41,6 +42,7 @@ type _global struct {
 	FunctionPrototype       *_object // Function.prototype
 	ArrayPrototype          *_object // Array.prototype
 	ArrayBufferPrototype    *_object // ArrayBuffer.prototype
+	DataViewPrototype       *_object // DataView.prototype
 	StringPrototype         *_object // String.prototype
 	BooleanPrototype        *_object // Boolean.prototype
 	NumberPrototype         *_object // Number.prototype

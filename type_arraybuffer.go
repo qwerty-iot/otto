@@ -2,6 +2,7 @@ package otto
 
 func (runtime *_runtime) newArrayBufferObject(length uint32) *_object {
 	self := runtime.newObject()
+	self.class = "ArrayBuffer"
 	self.defineProperty("byteLength", toValue_uint32(length), 0100, false)
 	self.defineProperty("buffer", toValue_string(string(make([]byte, length))), 0100, false)
 	return self
