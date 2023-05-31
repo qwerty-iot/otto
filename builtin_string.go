@@ -495,3 +495,24 @@ func builtinStringToLocaleLowerCase(call FunctionCall) Value {
 func builtinStringToLocaleUpperCase(call FunctionCall) Value {
 	return builtinStringToUpperCase(call)
 }
+
+func builtinString_startsWith(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	value := call.This.string()
+	target := call.Argument(0).string()
+	return boolValue(strings.HasPrefix(value, target))
+}
+
+func builtinString_endsWith(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	value := call.This.string()
+	target := call.Argument(0).string()
+	return boolValue(strings.HasSuffix(value, target))
+}
+
+func builtinString_includes(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	value := call.This.string()
+	target := call.Argument(0).string()
+	return boolValue(strings.Contains(value, target))
+}

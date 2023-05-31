@@ -6,6 +6,46 @@ import (
 	"math"
 )
 
+func _inlineFunction(rt *runtime, args int, name string, call nativeFunction) property {
+	return property{
+		mode: 0o101,
+		value: Value{
+			kind: valueObject,
+			value: &object{
+				runtime:     rt,
+				class:       classFunctionName,
+				objectClass: classObject,
+				prototype:   rt.global.FunctionPrototype,
+				extensible:  true,
+				property: map[string]property{
+					propertyLength: {
+						mode: 0,
+						value: Value{
+							kind:  valueNumber,
+							value: args,
+						},
+					},
+					propertyName: {
+						mode: 0,
+						value: Value{
+							kind:  valueString,
+							value: name,
+						},
+					},
+				},
+				propertyOrder: []string{
+					propertyLength,
+					propertyName,
+				},
+				value: nativeFunctionObject{
+					name: name,
+					call: call,
+				},
+			},
+		},
+	}
+}
+
 func (rt *runtime) newContext() {
 	// Order here is import as definitions depend on each other.
 
@@ -935,6 +975,43 @@ func (rt *runtime) newContext() {
 						value: nativeFunctionObject{
 							name: "getOwnPropertyNames",
 							call: builtinObjectGetOwnPropertyNames,
+						},
+					},
+				},
+			},
+			"assign": {
+				mode: 0o101,
+				value: Value{
+					kind: valueObject,
+					value: &object{
+						runtime:     rt,
+						class:       classFunctionName,
+						objectClass: classObject,
+						prototype:   rt.global.FunctionPrototype,
+						extensible:  true,
+						property: map[string]property{
+							propertyLength: {
+								mode: 0,
+								value: Value{
+									kind:  valueNumber,
+									value: 1,
+								},
+							},
+							propertyName: {
+								mode: 0,
+								value: Value{
+									kind:  valueString,
+									value: "assign",
+								},
+							},
+						},
+						propertyOrder: []string{
+							propertyLength,
+							propertyName,
+						},
+						value: nativeFunctionObject{
+							name: "assign",
+							call: builtinObject_assign,
 						},
 					},
 				},
@@ -1913,6 +1990,216 @@ func (rt *runtime) newContext() {
 		},
 	}
 
+	// ArrayBuffer prototype.
+	rt.global.ArrayBufferPrototype = &object{
+		runtime:     rt,
+		class:       classObjectName,
+		objectClass: classObject,
+		prototype:   rt.global.ObjectPrototype,
+		extensible:  true,
+		value:       nil,
+		property: map[string]property{
+			"byteLength": {
+				mode: 0o100,
+				value: Value{
+					kind:  valueNumber,
+					value: uint32(0),
+				},
+			},
+			"slice": {
+				mode: 0o101,
+				value: Value{
+					kind: valueObject,
+					value: &object{
+						runtime:     rt,
+						class:       classFunctionName,
+						objectClass: classObject,
+						prototype:   rt.global.FunctionPrototype,
+						extensible:  true,
+						property: map[string]property{
+							propertyLength: {
+								mode: 0,
+								value: Value{
+									kind:  valueNumber,
+									value: 2,
+								},
+							},
+							propertyName: {
+								mode: 0,
+								value: Value{
+									kind:  valueString,
+									value: "slice",
+								},
+							},
+						},
+						propertyOrder: []string{
+							propertyLength,
+							propertyName,
+						},
+						value: nativeFunctionObject{
+							name: "slice",
+							call: builtinArrayBuffer_slice,
+						},
+					},
+				},
+			},
+		},
+		propertyOrder: []string{
+			"byteLength",
+			propertyConstructor,
+			"slice",
+		},
+	}
+
+	// ArrayBuffer definition.
+	rt.global.ArrayBuffer = &object{
+		runtime:     rt,
+		class:       classFunctionName,
+		objectClass: classObject,
+		prototype:   rt.global.FunctionPrototype,
+		extensible:  true,
+		value: nativeFunctionObject{
+			name:      "ArrayBuffer",
+			call:      builtinArrayBuffer,
+			construct: builtinNewArrayBuffer,
+		},
+		property: map[string]property{
+			"byteLength": {
+				mode: 0,
+				value: Value{
+					kind:  valueNumber,
+					value: 1,
+				},
+			},
+			propertyPrototype: {
+				mode: 0,
+				value: Value{
+					kind:  valueObject,
+					value: rt.global.ArrayBufferPrototype,
+				},
+			},
+		},
+		propertyOrder: []string{
+			"byteLength",
+			propertyPrototype,
+		},
+	}
+
+	// Array constructor definition.
+	rt.global.ArrayBufferPrototype.property[propertyConstructor] = property{
+		mode: 0o101,
+		value: Value{
+			kind:  valueObject,
+			value: rt.global.ArrayBuffer,
+		},
+	}
+
+	// DataView prototype.
+	rt.global.DataViewPrototype = &object{
+		runtime:     rt,
+		class:       classObjectName,
+		objectClass: classObject,
+		prototype:   rt.global.ObjectPrototype,
+		extensible:  true,
+		value:       nil,
+		property: map[string]property{
+			"byteLength": {
+				mode: 0o100,
+				value: Value{
+					kind:  valueNumber,
+					value: uint32(0),
+				},
+			},
+			"getInt8":      _inlineFunction(rt, 2, "getInt8", builtinDataView_getInt8),
+			"getUint8":     _inlineFunction(rt, 2, "getUint8", builtinDataView_getUint8),
+			"getInt16":     _inlineFunction(rt, 2, "getInt16", builtinDataView_getInt16),
+			"getUint16":    _inlineFunction(rt, 2, "getUint16", builtinDataView_getUint16),
+			"getInt32":     _inlineFunction(rt, 2, "getInt32", builtinDataView_getInt32),
+			"getUint32":    _inlineFunction(rt, 2, "getUint32", builtinDataView_getUint32),
+			"getBigInt64":  _inlineFunction(rt, 2, "getBigInt64", builtinDataView_getBigInt64),
+			"getBigUint64": _inlineFunction(rt, 2, "getBigUint64", builtinDataView_getBigUint64),
+			"getFloat32":   _inlineFunction(rt, 2, "getFloat32", builtinDataView_getFloat32),
+			"getFloat64":   _inlineFunction(rt, 2, "getFloat64", builtinDataView_getFloat64),
+			"setInt8":      _inlineFunction(rt, 2, "setInt8", builtinDataView_setInt8),
+			"setUint8":     _inlineFunction(rt, 2, "setUint8", builtinDataView_setUint8),
+			"setInt16":     _inlineFunction(rt, 2, "setInt16", builtinDataView_setInt16),
+			"setUint16":    _inlineFunction(rt, 2, "setUint16", builtinDataView_setUint16),
+			"setInt32":     _inlineFunction(rt, 2, "setInt32", builtinDataView_setInt32),
+			"setUint32":    _inlineFunction(rt, 2, "setUint32", builtinDataView_setUint32),
+			"setBigInt64":  _inlineFunction(rt, 2, "setBigInt64", builtinDataView_setBigInt64),
+			"setBigUint64": _inlineFunction(rt, 2, "setBigUint64", builtinDataView_setBigUint64),
+			"setFloat32":   _inlineFunction(rt, 2, "setFloat32", builtinDataView_setFloat32),
+			"setFloat64":   _inlineFunction(rt, 2, "setFloat64", builtinDataView_setFloat64),
+		},
+		propertyOrder: []string{
+			"byteLength",
+			propertyConstructor,
+			"getInt8",
+			"getUint8",
+			"getInt16",
+			"getUint16",
+			"getInt32",
+			"getUint32",
+			"getBigInt64",
+			"getBigUint64",
+			"geFloat32",
+			"getFloat64",
+			"setInt8",
+			"setUint8",
+			"setInt16",
+			"setUint16",
+			"setInt32",
+			"setUint32",
+			"setBigInt64",
+			"setBigUint64",
+			"setFloat32",
+			"setFloat64",
+		},
+	}
+
+	// DataView definition.
+	rt.global.DataView = &object{
+		runtime:     rt,
+		class:       classFunctionName,
+		objectClass: classObject,
+		prototype:   rt.global.FunctionPrototype,
+		extensible:  true,
+		value: nativeFunctionObject{
+			name:      "DataView",
+			call:      builtinDataView,
+			construct: builtinNewDataView,
+		},
+		property: map[string]property{
+			"byteLength": {
+				mode: 0,
+				value: Value{
+					kind:  valueNumber,
+					value: 1,
+				},
+			},
+			propertyPrototype: {
+				mode: 0,
+				value: Value{
+					kind:  valueObject,
+					value: rt.global.DataViewPrototype,
+				},
+			},
+		},
+		propertyOrder: []string{
+			"byteLength",
+			propertyPrototype,
+		},
+	}
+
+	// DataView constructor definition.
+	rt.global.DataViewPrototype.property[propertyConstructor] = property{
+		mode: 0o101,
+		value: Value{
+			kind:  valueObject,
+			value: rt.global.DataView,
+		},
+	}
+
 	// String prototype.
 	rt.global.StringPrototype = &object{
 		runtime:     rt,
@@ -2036,6 +2323,80 @@ func (rt *runtime) newContext() {
 						value: nativeFunctionObject{
 							name: "concat",
 							call: builtinStringConcat,
+						},
+					},
+				},
+			},
+			"endsWith": {
+				mode: 0o101,
+				value: Value{
+					kind: valueObject,
+					value: &object{
+						runtime:     rt,
+						class:       classFunctionName,
+						objectClass: classObject,
+						prototype:   rt.global.FunctionPrototype,
+						extensible:  true,
+						property: map[string]property{
+							propertyLength: {
+								mode: 0,
+								value: Value{
+									kind:  valueNumber,
+									value: 1,
+								},
+							},
+							propertyName: {
+								mode: 0,
+								value: Value{
+									kind:  valueString,
+									value: "endsWith",
+								},
+							},
+						},
+						propertyOrder: []string{
+							propertyLength,
+							propertyName,
+						},
+						value: nativeFunctionObject{
+							name: "endsWith",
+							call: builtinString_endsWith,
+						},
+					},
+				},
+			},
+			"includes": {
+				mode: 0o101,
+				value: Value{
+					kind: valueObject,
+					value: &object{
+						runtime:     rt,
+						class:       classFunctionName,
+						objectClass: classObject,
+						prototype:   rt.global.FunctionPrototype,
+						extensible:  true,
+						property: map[string]property{
+							propertyLength: {
+								mode: 0,
+								value: Value{
+									kind:  valueNumber,
+									value: 1,
+								},
+							},
+							propertyName: {
+								mode: 0,
+								value: Value{
+									kind:  valueString,
+									value: "includes",
+								},
+							},
+						},
+						propertyOrder: []string{
+							propertyLength,
+							propertyName,
+						},
+						value: nativeFunctionObject{
+							name: "includes",
+							call: builtinString_includes,
 						},
 					},
 				},
@@ -2332,6 +2693,43 @@ func (rt *runtime) newContext() {
 						value: nativeFunctionObject{
 							name: "split",
 							call: builtinStringSplit,
+						},
+					},
+				},
+			},
+			"startsWith": {
+				mode: 0o101,
+				value: Value{
+					kind: valueObject,
+					value: &object{
+						runtime:     rt,
+						class:       classFunctionName,
+						objectClass: classObject,
+						prototype:   rt.global.FunctionPrototype,
+						extensible:  true,
+						property: map[string]property{
+							propertyLength: {
+								mode: 0,
+								value: Value{
+									kind:  valueNumber,
+									value: 1,
+								},
+							},
+							propertyName: {
+								mode: 0,
+								value: Value{
+									kind:  valueString,
+									value: "startsWith",
+								},
+							},
+						},
+						propertyOrder: []string{
+							propertyLength,
+							propertyName,
+						},
+						value: nativeFunctionObject{
+							name: "startsWith",
+							call: builtinString_startsWith,
 						},
 					},
 				},
@@ -2750,6 +3148,8 @@ func (rt *runtime) newContext() {
 			"charAt",
 			"charCodeAt",
 			"concat",
+			"endsWith",
+			"includes",
 			"indexOf",
 			"lastIndexOf",
 			"localeCompare",
@@ -2758,6 +3158,7 @@ func (rt *runtime) newContext() {
 			"search",
 			"slice",
 			"split",
+			"startsWith",
 			"substr",
 			"substring",
 			methodToString,
@@ -8001,6 +8402,20 @@ func (rt *runtime) newContext() {
 				value: rt.global.Array,
 			},
 		},
+		"ArrayBuffer": {
+			mode: 0o101,
+			value: Value{
+				kind:  valueObject,
+				value: rt.global.ArrayBuffer,
+			},
+		},
+		"DataView": {
+			mode: 0o101,
+			value: Value{
+				kind:  valueObject,
+				value: rt.global.DataView,
+			},
+		},
 		classStringName: {
 			mode: 0o101,
 			value: Value{
@@ -8137,10 +8552,12 @@ func (rt *runtime) newContext() {
 		classObjectName,
 		classFunctionName,
 		classArrayName,
+		"ArrayBuffer",
 		classStringName,
 		classBooleanName,
 		classNumberName,
 		classMathName,
+		"DataView",
 		classDateName,
 		classRegExpName,
 		classErrorName,
@@ -8558,6 +8975,20 @@ func intValue(value int) Value {
 	}
 }
 
+func int8Value(value int8) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
+func int16Value(value int16) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
 func int32Value(value int32) Value {
 	return Value{
 		kind:  valueNumber,
@@ -8572,6 +9003,20 @@ func int64Value(value int64) Value {
 	}
 }
 
+func uintValue(value uint) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
+func uint8Value(value uint8) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
 func uint16Value(value uint16) Value {
 	return Value{
 		kind:  valueNumber,
@@ -8580,6 +9025,20 @@ func uint16Value(value uint16) Value {
 }
 
 func uint32Value(value uint32) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
+func uint64Value(value uint64) Value {
+	return Value{
+		kind:  valueNumber,
+		value: value,
+	}
+}
+
+func float32Value(value float32) Value {
 	return Value{
 		kind:  valueNumber,
 		value: value,

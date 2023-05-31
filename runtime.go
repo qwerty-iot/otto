@@ -21,6 +21,8 @@ type global struct {
 	Object         *object // Object( ... ), new Object( ... ) - 1 (length)
 	Function       *object // Function( ... ), new Function( ... ) - 1
 	Array          *object // Array( ... ), new Array( ... ) - 1
+	ArrayBuffer    *object // ArrayBuffer( ... ), new ArrayBuffer( ... ) - 1
+	DataView       *object // DataView( ... ), new DataView( ... ) - 1
 	String         *object // String( ... ), new String( ... ) - 1
 	Boolean        *object // Boolean( ... ), new Boolean( ... ) - 1
 	Number         *object // Number( ... ), new Number( ... ) - 1
@@ -39,6 +41,8 @@ type global struct {
 	ObjectPrototype         *object // Object.prototype
 	FunctionPrototype       *object // Function.prototype
 	ArrayPrototype          *object // Array.prototype
+	ArrayBufferPrototype    *object // ArrayBuffer.prototype
+	DataViewPrototype       *object // DataView.prototype
 	StringPrototype         *object // String.prototype
 	BooleanPrototype        *object // Boolean.prototype
 	NumberPrototype         *object // Number.prototype
@@ -498,7 +502,16 @@ func (rt *runtime) convertCallParameter(v Value, t reflect.Type) (reflect.Value,
 					err = fmt.Errorf("couldn't convert property %q of %s: %w", k, t, verr)
 					return false
 				}
-				m.SetMapIndex(reflect.ValueOf(k), v)
+				if v.IsNil() {
+					if mi, ok := m.Interface().(map[string]interface{}); ok {
+						mi[reflect.ValueOf(k).String()] = nil
+					} else {
+						err = fmt.Errorf("error setting nil %q of %s: not map[string]interface{}", k, t)
+						return false
+					}
+				} else {
+					m.SetMapIndex(reflect.ValueOf(k), v)
+				}
 				return true
 			})
 

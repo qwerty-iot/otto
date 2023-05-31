@@ -82,7 +82,17 @@ func goMapDefineOwnProperty(obj *object, name string, descriptor property, throw
 	if !descriptor.isDataDescriptor() {
 		return obj.runtime.typeErrorResult(throw)
 	}
-	goObj.value.SetMapIndex(goObj.toKey(name), goObj.toValue(descriptor.value.(Value)))
+
+	if descriptor.value.(Value).IsNull() {
+		if mi, ok := goObj.value.Interface().(map[string]interface{}); ok {
+			mi[goObj.toKey(name).String()] = nil
+		} else {
+			return obj.runtime.typeErrorResult(throw)
+		}
+	} else {
+		goObj.value.SetMapIndex(goObj.toKey(name), goObj.toValue(descriptor.value.(Value)))
+	}
+
 	return true
 }
 

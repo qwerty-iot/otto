@@ -287,3 +287,18 @@ func builtinObjectGetOwnPropertyNames(call FunctionCall) Value {
 	// Default to empty array for non object types.
 	return objectValue(call.runtime.newArray(0))
 }
+
+func builtinObject_assign(call FunctionCall) Value {
+	target := call.Argument(0).object()
+	source := call.Argument(1).object()
+	if target == nil || source == nil {
+		panic(call.runtime.panicTypeError())
+	}
+	source.enumerate(true, func(name string) bool {
+		if source.hasOwnProperty(name) {
+			target.put(name, source.get(name), true)
+		}
+		return true
+	})
+	return objectValue(target)
+}
