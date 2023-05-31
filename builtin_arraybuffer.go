@@ -1,7 +1,5 @@
 package otto
 
-import "github.com/davecgh/go-spew/spew"
-
 func builtinArrayBuffer(call FunctionCall) Value {
 	return objectValue(builtinNewArrayBufferNative(call.runtime, call.ArgumentList))
 }
@@ -32,8 +30,6 @@ func builtinArrayBuffer_slice(call FunctionCall) Value {
 		return objectValue(call.runtime.newArrayBuffer(0))
 	}
 	buffer := thisObject.get("buffer").string()
-
-	spew.Dump([]byte(buffer), start, end)
 
 	return objectValue(call.runtime.newArrayBufferOf(buffer[start:end]))
 }
