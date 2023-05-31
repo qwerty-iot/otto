@@ -6,14 +6,14 @@ import (
 )
 
 func builtinDataView(call FunctionCall) Value {
-	return toValue_object(builtinNewDataViewNative(call.runtime, call.ArgumentList))
+	return objectValue(builtinNewDataViewNative(call.runtime, call.ArgumentList))
 }
 
-func builtinNewDataView(self *_object, argumentList []Value) Value {
-	return toValue_object(builtinNewDataViewNative(self.runtime, argumentList))
+func builtinNewDataView(self *object, argumentList []Value) Value {
+	return objectValue(builtinNewDataViewNative(self.runtime, argumentList))
 }
 
-func builtinNewDataViewNative(runtime *_runtime, argumentList []Value) *_object {
+func builtinNewDataViewNative(runtime *runtime, argumentList []Value) *object {
 	if len(argumentList) == 1 {
 		firstArgument := argumentList[0]
 		if firstArgument.IsObject() && firstArgument.Class() == "ArrayBuffer" {
@@ -30,9 +30,9 @@ func builtinDataView_getInt8(call FunctionCall) Value {
 	length := int64(toUint32(thisObject.get("byteLength")))
 	index := valueToRangeIndex(valueOfArrayIndex(call.ArgumentList, 0), length, true)
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 
-	return toValue_int8(int8(strBuffer[index]))
+	return int8Value(int8(strBuffer[index]))
 }
 
 func builtinDataView_getUint8(call FunctionCall) Value {
@@ -41,9 +41,9 @@ func builtinDataView_getUint8(call FunctionCall) Value {
 	length := int64(toUint32(thisObject.get("byteLength")))
 	index := valueToRangeIndex(valueOfArrayIndex(call.ArgumentList, 0), length, true)
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 
-	return toValue_uint8(strBuffer[index])
+	return uint8Value(strBuffer[index])
 }
 
 func builtinDataView_getInt16(call FunctionCall) Value {
@@ -57,7 +57,7 @@ func builtinDataView_getInt16(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint16
 	if littleEndian {
@@ -66,7 +66,7 @@ func builtinDataView_getInt16(call FunctionCall) Value {
 		val = binary.BigEndian.Uint16(bb[index:])
 
 	}
-	return toValue_int16(int16(val))
+	return int16Value(int16(val))
 }
 
 func builtinDataView_getUint16(call FunctionCall) Value {
@@ -80,7 +80,7 @@ func builtinDataView_getUint16(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint16
 	if littleEndian {
@@ -89,7 +89,7 @@ func builtinDataView_getUint16(call FunctionCall) Value {
 		val = binary.BigEndian.Uint16(bb[index:])
 
 	}
-	return toValue_uint16(val)
+	return uint16Value(val)
 }
 
 func builtinDataView_getInt32(call FunctionCall) Value {
@@ -103,7 +103,7 @@ func builtinDataView_getInt32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint32
 	if littleEndian {
@@ -112,7 +112,7 @@ func builtinDataView_getInt32(call FunctionCall) Value {
 		val = binary.BigEndian.Uint32(bb[index:])
 
 	}
-	return toValue_int32(int32(val))
+	return int32Value(int32(val))
 }
 
 func builtinDataView_getUint32(call FunctionCall) Value {
@@ -126,7 +126,7 @@ func builtinDataView_getUint32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint32
 	if littleEndian {
@@ -135,7 +135,7 @@ func builtinDataView_getUint32(call FunctionCall) Value {
 		val = binary.BigEndian.Uint32(bb[index:])
 
 	}
-	return toValue_uint32(val)
+	return uint32Value(val)
 }
 
 func builtinDataView_getBigInt64(call FunctionCall) Value {
@@ -149,7 +149,7 @@ func builtinDataView_getBigInt64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint64
 	if littleEndian {
@@ -158,7 +158,7 @@ func builtinDataView_getBigInt64(call FunctionCall) Value {
 		val = binary.BigEndian.Uint64(bb[index:])
 
 	}
-	return toValue_int64(int64(val))
+	return int64Value(int64(val))
 }
 
 func builtinDataView_getBigUint64(call FunctionCall) Value {
@@ -172,7 +172,7 @@ func builtinDataView_getBigUint64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint64
 	if littleEndian {
@@ -181,7 +181,7 @@ func builtinDataView_getBigUint64(call FunctionCall) Value {
 		val = binary.BigEndian.Uint64(bb[index:])
 
 	}
-	return toValue_uint64(val)
+	return uint64Value(val)
 }
 
 func builtinDataView_getFloat32(call FunctionCall) Value {
@@ -195,7 +195,7 @@ func builtinDataView_getFloat32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint32
 
@@ -205,7 +205,7 @@ func builtinDataView_getFloat32(call FunctionCall) Value {
 		val = binary.BigEndian.Uint32(bb[index:])
 
 	}
-	return toValue_float32(math.Float32frombits(val))
+	return float32Value(math.Float32frombits(val))
 }
 
 func builtinDataView_getFloat64(call FunctionCall) Value {
@@ -219,7 +219,7 @@ func builtinDataView_getFloat64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	var val uint64
 	if littleEndian {
@@ -228,7 +228,7 @@ func builtinDataView_getFloat64(call FunctionCall) Value {
 		val = binary.BigEndian.Uint64(bb[index:])
 
 	}
-	return toValue_float64(math.Float64frombits(val))
+	return float64Value(math.Float64frombits(val))
 }
 
 func builtinDataView_setInt8(call FunctionCall) Value {
@@ -245,10 +245,10 @@ func builtinDataView_setInt8(call FunctionCall) Value {
 		panic(call.runtime.panicRangeError("int8 out of range"))
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	bb[index] = byte(val)
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -266,10 +266,10 @@ func builtinDataView_setUint8(call FunctionCall) Value {
 		panic(call.runtime.panicRangeError("uint8 out of range"))
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	bb[index] = byte(val)
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -292,14 +292,14 @@ func builtinDataView_setInt16(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint16(bb[index:], uint16(val))
 	} else {
 		binary.BigEndian.PutUint16(bb[index:], uint16(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -322,14 +322,14 @@ func builtinDataView_setUint16(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint16(bb[index:], uint16(val))
 	} else {
 		binary.BigEndian.PutUint16(bb[index:], uint16(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -352,14 +352,14 @@ func builtinDataView_setInt32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint32(bb[index:], uint32(val))
 	} else {
 		binary.BigEndian.PutUint32(bb[index:], uint32(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -382,14 +382,14 @@ func builtinDataView_setUint32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint32(bb[index:], uint32(val))
 	} else {
 		binary.BigEndian.PutUint32(bb[index:], uint32(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -411,14 +411,14 @@ func builtinDataView_setBigInt64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint64(bb[index:], uint64(val))
 	} else {
 		binary.BigEndian.PutUint64(bb[index:], uint64(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -441,14 +441,14 @@ func builtinDataView_setBigUint64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint64(bb[index:], uint64(val))
 	} else {
 		binary.BigEndian.PutUint64(bb[index:], uint64(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -468,14 +468,14 @@ func builtinDataView_setFloat32(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint32(bb[index:], uint32(math.Float32bits(float32(val))))
 	} else {
 		binary.BigEndian.PutUint32(bb[index:], uint32(math.Float32bits(float32(val))))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }
 
@@ -495,13 +495,13 @@ func builtinDataView_setFloat64(call FunctionCall) Value {
 		panic(err)
 	}
 
-	strBuffer := thisObject.get("buffer")._object().get("buffer").string()
+	strBuffer := thisObject.get("buffer").object().get("buffer").string()
 	bb := []byte(strBuffer)
 	if littleEndian {
 		binary.LittleEndian.PutUint64(bb[index:], math.Float64bits(val))
 	} else {
 		binary.BigEndian.PutUint64(bb[index:], math.Float64bits(val))
 	}
-	thisObject.get("buffer")._object().put("buffer", toValue_string(string(bb)), true)
+	thisObject.get("buffer").object().put("buffer", stringValue(string(bb)), true)
 	return Value{}
 }

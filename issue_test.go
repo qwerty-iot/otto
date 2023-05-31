@@ -1,7 +1,11 @@
 package otto
 
 import (
+	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,14 +24,14 @@ func Test_issue116(t *testing.T) {
 	})
 }
 
-func Test_262(t *testing.T) {
+func Test_issue262(t *testing.T) {
 	tt(t, func() {
 		test, _ := test()
 
 		// 11.13.1-1-1
 		test(`raise:
             eval("42 = 42;");
-        `, "ReferenceError: Invalid left-hand side in assignment")
+        `, "SyntaxError: (anonymous): Line 1:1 invalid left-hand side in assignment")
 	})
 }
 
@@ -50,26 +54,18 @@ func Test_issue13(t *testing.T) {
 			"number": 42,
 			"array":  []string{"def", "ghi"},
 		})
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		fn, err := vm.Object(`
             (function(value){
                 return ""+[value.string, value.number, value.array]
             })
         `)
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		result, err := fn.Value().Call(fn.Value(), value)
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		require.NoError(t, err)
+
 		is(result.string(), "Xyzzy,42,def,ghi")
 
 		anything := struct {
@@ -88,7 +84,8 @@ func Test_issue13(t *testing.T) {
 			},
 		}
 
-		vm.Set("anything", anything)
+		err = vm.Set("anything", anything)
+		require.NoError(t, err)
 		test(`
             [
                 anything,
@@ -142,7 +139,7 @@ func Test_issue16(t *testing.T) {
 func Test_issue21(t *testing.T) {
 	tt(t, func() {
 		vm1 := New()
-		vm1.Run(`
+		_, err := vm1.Run(`
             abc = {}
             abc.ghi = "Nothing happens.";
             var jkl = 0;
@@ -151,11 +148,13 @@ func Test_issue21(t *testing.T) {
                 return 1;
             }
         `)
+		require.NoError(t, err)
 		abc, err := vm1.Get("abc")
-		is(err, nil)
+		require.NoError(t, err)
 
 		vm2 := New()
-		vm2.Set("cba", abc)
+		err = vm2.Set("cba", abc)
+		require.NoError(t, err)
 		_, err = vm2.Run(`
             var pqr = 0;
             cba.mno = function() {
@@ -166,10 +165,10 @@ func Test_issue21(t *testing.T) {
             cba.def();
             cba.def();
         `)
-		is(err, nil)
+		require.NoError(t, err)
 
 		jkl, err := vm1.Get("jkl")
-		is(err, nil)
+		require.NoError(t, err)
 		is(jkl, 3)
 
 		_, err = vm1.Run(`
@@ -177,10 +176,10 @@ func Test_issue21(t *testing.T) {
             abc.mno();
             abc.mno();
         `)
-		is(err, nil)
+		require.NoError(t, err)
 
 		pqr, err := vm2.Get("pqr")
-		is(err, nil)
+		require.NoError(t, err)
 		is(pqr, -3)
 	})
 }
@@ -192,7 +191,7 @@ func Test_issue24(t *testing.T) {
 		{
 			vm.Set("abc", []string{"abc", "def", "ghi"})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
 				value, valid := export.([]string)
@@ -206,7 +205,7 @@ func Test_issue24(t *testing.T) {
 		{
 			vm.Set("abc", [...]string{"abc", "def", "ghi"})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
 				value, valid := export.([3]string)
@@ -220,7 +219,7 @@ func Test_issue24(t *testing.T) {
 		{
 			vm.Set("abc", &[...]string{"abc", "def", "ghi"})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
 				value, valid := export.(*[3]string)
@@ -234,7 +233,7 @@ func Test_issue24(t *testing.T) {
 		{
 			vm.Set("abc", map[int]string{0: "abc", 1: "def", 2: "ghi"})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
 				value, valid := export.(map[int]string)
@@ -246,12 +245,12 @@ func Test_issue24(t *testing.T) {
 		}
 
 		{
-			vm.Set("abc", _abcStruct{Abc: true, Ghi: "Nothing happens."})
+			vm.Set("abc", abcStruct{Abc: true, Ghi: "Nothing happens."})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
-				value, valid := export.(_abcStruct)
+				value, valid := export.(abcStruct)
 				is(valid, true)
 
 				is(value.Abc, true)
@@ -260,12 +259,12 @@ func Test_issue24(t *testing.T) {
 		}
 
 		{
-			vm.Set("abc", &_abcStruct{Abc: true, Ghi: "Nothing happens."})
+			vm.Set("abc", &abcStruct{Abc: true, Ghi: "Nothing happens."})
 			value, err := vm.Get("abc")
-			is(err, nil)
+			require.NoError(t, err)
 			export, _ := value.Export()
 			{
-				value, valid := export.(*_abcStruct)
+				value, valid := export.(*abcStruct)
 				is(valid, true)
 
 				is(value.Abc, true)
@@ -364,7 +363,7 @@ func Test_S7_3_A2_1_T1(t *testing.T) {
 
 		test(`raise:
             eval("'\u000Astr\u000Aing\u000A'")
-        `, "SyntaxError: Unexpected token ILLEGAL")
+        `, "SyntaxError: (anonymous): Line 1:1 Unexpected token ILLEGAL")
 	})
 }
 
@@ -474,12 +473,12 @@ def"
             while (true) {
                 eval("continue abc");
             }
-        `, "SyntaxError: Undefined label 'abc'")
+        `, "SyntaxError: (anonymous): Line 1:1 Undefined label 'abc'")
 
 		// S15.1.2.1_A3.3_T3
 		test(`raise:
             eval("return");
-        `, "SyntaxError: Illegal return statement")
+        `, "SyntaxError: (anonymous): Line 1:1 Illegal return statement")
 
 		// 15.2.3.3-2-33
 		test(`
@@ -490,7 +489,7 @@ def"
 		// S15.3_A2_T1
 		test(`raise:
             Function.call(this, "var x / = 1;");
-        `, "SyntaxError: Unexpected token /")
+        `, "SyntaxError: (anonymous): Line 2:7 Unexpected token / (and 3 more errors)")
 
 		// ?
 		test(`
@@ -534,7 +533,7 @@ func Test_issue79(t *testing.T) {
 	tt(t, func() {
 		test, vm := test()
 
-		vm.Set("abc", []_abcStruct{
+		vm.Set("abc", []abcStruct{
 			{
 				Ghi: "一",
 				Def: 1,
@@ -638,7 +637,7 @@ d[e>>>5]|=128<<24-e%32;d[(e+64>>>9<<4)+14]=h.floor(b/4294967296);d[(e+64>>>9<<4)
 (function(){var h=CryptoJS,s=h.enc.Utf8;h.algo.HMAC=h.lib.Base.extend({init:function(f,g){f=this._hasher=new f.init;"string"==typeof g&&(g=s.parse(g));var h=f.blockSize,m=4*h;g.sigBytes>m&&(g=f.finalize(g));g.clamp();for(var r=this._oKey=g.clone(),l=this._iKey=g.clone(),k=r.words,n=l.words,j=0;j<h;j++)k[j]^=1549556828,n[j]^=909522486;r.sigBytes=l.sigBytes=m;this.reset()},reset:function(){var f=this._hasher;f.reset();f.update(this._iKey)},update:function(f){this._hasher.update(f);return this},finalize:function(f){var g=
 this._hasher;f=g.finalize(f);g.reset();return g.finalize(this._oKey.clone().concat(f))}})})();
         `)
-		is(err, nil)
+		require.NoError(t, err)
 
 		test(`CryptoJS.HmacSHA256("Message", "secret");`, "aa747c502a898200f9e4fa21bac68136f886a0e27aec70ba06daf2e2a5cb5597")
 	})
@@ -729,12 +728,14 @@ func Test_issue186(t *testing.T) {
 	}
 
 	vm := New()
-	vm.Set("abc", func(a string, b string, c string) int {
+	err := vm.Set("abc", func(a string, b string, c string) int {
 		return 1
 	})
-	vm.Set("num", func(a int, b int, c int) int {
+	require.NoError(t, err)
+	err = vm.Set("num", func(a int, b int, c int) int {
 		return 1
 	})
+	require.NoError(t, err)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -770,6 +771,375 @@ func Test_issue266(t *testing.T) {
 				return a - b;
 			});
         `, "-200000000000,0,200000000000")
-
 	})
+}
+
+func Test_issue369(t *testing.T) {
+	tt(t, func() {
+		test, tester := test()
+
+		type Test struct {
+			Value string
+		}
+
+		type PtrTest struct {
+			*Test
+		}
+
+		testItem := Test{
+			Value: "A test value",
+		}
+
+		ptrTestItem := PtrTest{
+			Test: &testItem,
+		}
+
+		tester.Set("testVariable", ptrTestItem)
+
+		test(`
+		JSON.stringify(testVariable);
+	`, `{"Test":{"Value":"A test value"}}`)
+	})
+}
+
+// testResult is a test driver.Result.
+type testResult struct{}
+
+func (r *testResult) LastInsertId() (int64, error) {
+	return 0, fmt.Errorf("not supported")
+}
+
+func (r *testResult) RowsAffected() (int64, error) {
+	return 1, nil
+}
+
+// testStmt is a test driver.Stmt.
+type testStmt struct{}
+
+// Close implements driver.Stmt.
+func (s *testStmt) Close() error {
+	return nil
+}
+
+// NumInput implements driver.Stmt.
+func (s *testStmt) NumInput() int {
+	return -1
+}
+
+// Exec implements driver.Stmt.
+func (s *testStmt) Exec(args []driver.Value) (driver.Result, error) {
+	return &testResult{}, nil
+}
+
+// Query implements driver.Stmt.
+func (s *testStmt) Query(args []driver.Value) (driver.Rows, error) {
+	return nil, fmt.Errorf("not supported")
+}
+
+// testConn is a test driver.Conn.
+type testConn struct{}
+
+// Prepare implements driver.Conn.
+func (c *testConn) Prepare(query string) (driver.Stmt, error) {
+	return &testStmt{}, nil
+}
+
+// Close implements driver.Conn.
+func (c *testConn) Close() error {
+	return nil
+}
+
+// Begin implements driver.Conn.
+func (c *testConn) Begin() (driver.Tx, error) {
+	return nil, fmt.Errorf("not supported")
+}
+
+// testDriver is test driver.Driver.
+type testDriver struct{}
+
+// Open implements driver.Driver.
+func (db *testDriver) Open(name string) (driver.Conn, error) {
+	return &testConn{}, nil
+}
+
+func Test_issue390(t *testing.T) {
+	sql.Register("testDriver", &testDriver{})
+	db, err := sql.Open("testDriver", "test.db")
+	require.NoError(t, err)
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS log (message)")
+	require.NoError(t, err)
+
+	vm := New()
+	err = vm.Set("db", db)
+	require.NoError(t, err)
+	val, err := vm.Run(`
+		db.Exec("CREATE TABLE log (message)")
+		var results = db.Exec("INSERT INTO log(message) VALUES(?)", "test123");
+		var res = results[0];
+		var err = results[1];
+		if (typeof err !== 'undefined') {
+			result = err
+		} else {
+			results = res.RowsAffected()
+			var rows = results[0];
+			var err = results[1];
+			if (typeof err !== 'undefined') {
+				result = err
+			} else {
+				result = rows;
+			}
+		}
+		result`,
+	)
+	require.NoError(t, err)
+	rows, err := val.ToInteger()
+	require.NoError(t, err)
+	require.Equal(t, int64(1), rows)
+}
+
+type testSetType struct {
+	String string
+	Array  [1]string
+	Slice  []string
+}
+
+func Test_issue386(t *testing.T) {
+	var msg testSetType
+	msg.String = "string"
+	msg.Slice = []string{"slice"}
+	msg.Array[0] = "array"
+
+	vm := New()
+	err := vm.Set("msg", &msg)
+	require.NoError(t, err)
+
+	tests := map[string]string{
+		"string": `
+			msg.TypeMessage = 'something';
+			msg.TypeMessage;`,
+		"array": `
+			msg.Array[0] = 'something';
+			msg.Array[0]`,
+		"slice": `
+			msg.Slice[0] = 'something';
+			msg.Slice[0]`,
+	}
+
+	for name, code := range tests {
+		t.Run(name, func(t *testing.T) {
+			val, err := vm.Run(code)
+			require.NoError(t, err)
+			require.Equal(t, "something", val.String())
+		})
+	}
+}
+
+func Test_issue383(t *testing.T) {
+	vm := New()
+	err := vm.Set("panicFunc", func(call FunctionCall) Value {
+		panic("test")
+	})
+	require.NoError(t, err)
+	_, err = vm.Run(`
+		try {
+			panicFunc()
+		} catch (err) {
+			console.log("panic triggered:", err)
+		}
+	`)
+	require.NoError(t, err)
+}
+
+func Test_issue357(t *testing.T) {
+	vm := New()
+	arr := []string{"wow", "hey"}
+	err := vm.Set("arr", arr)
+	require.NoError(t, err)
+
+	val, err := vm.Run(`
+		arr.push('another', 'more');
+		arr;
+	`)
+	require.NoError(t, err)
+	iface, err := val.Export()
+	require.NoError(t, err)
+
+	slice, ok := iface.([]string)
+	require.True(t, ok)
+
+	require.Equal(t, []string{"wow", "hey", "another", "more"}, slice)
+}
+
+func Test_issue302(t *testing.T) {
+	tests := map[string]struct {
+		code string
+		want string
+	}{
+		"underflow": {
+			code: "new Date(9223372036855).toUTCString();",
+			want: "Fri, 11 Apr 2262 23:47:16 GMT",
+		},
+		"after-2262": {
+			code: "new Date('2263-04-11T23:47:16.855Z').toUTCString();",
+			want: "Sat, 11 Apr 2263 23:47:16 GMT",
+		},
+		"before-1677": {
+			code: "new Date('1676-09-21T00:12:43.146Z').toUTCString();",
+			want: "Mon, 21 Sep 1676 00:12:43 GMT",
+		},
+	}
+
+	vm := New()
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			val, err := vm.Run(tt.code)
+			require.NoError(t, err)
+
+			exp, err := val.Export()
+			require.NoError(t, err)
+			require.Equal(t, tt.want, exp)
+		})
+	}
+}
+
+func Test_issue329(t *testing.T) {
+	vm := New()
+	val, err := vm.Run(`
+		run(c);
+		var stackLen;
+		function run(fn) {
+			try {
+				fn();
+			} catch (err) {
+				stackLen = err.stack.split(/\n/).length;
+			}
+		};
+
+		function c() { d() }
+		function d() { return 'x'.join(',') }
+		stackLen;
+	`)
+	require.NoError(t, err)
+	length, err := val.Export()
+	require.NoError(t, err)
+	require.Equal(t, uint32(6), length)
+}
+
+func Test_issue317(t *testing.T) {
+	vm := New()
+	tests := map[string]struct {
+		input  string
+		regexp string
+		want   string
+	}{
+		"match-all": {
+			input:  "all-11-22-33-44-55-66-77-88-99-XX",
+			regexp: "(1+)-(2+)-(3+)-(4+)-(5+)-(6+)-(7+)-(8+)-(9+)-(X+)",
+			want:   "all-11-22-33-44-55-66-77-88-99-XX,11,22,33,44,55,66,77,88,99",
+		},
+		"match-partial": {
+			input:  "partial-11-22-33-44-55-66-77-88-99-XX",
+			regexp: "(1+)-(2+)-(3+)-(4+)-(5+)",
+			want:   "partial-11-22-33-44-55-66-77-88-99-XX,11,22,33,44,55,,,,",
+		},
+		"no-match": {
+			input:  "no-22-33-44-55-66-77-88-99-XX",
+			regexp: "(1+)-(2+)-(3+)-(4+)-(5+)-(6+)-(7+)-(8+)-(9+)-(X+)",
+			want:   "",
+		},
+		"missing-match": {
+			input:  "data:image/png;base64,",
+			regexp: "^data:(.*?)(;(.*?))??(;base64)?,",
+			want:   "data:image/png;base64,,image/png,,,;base64,,,,,",
+		},
+	}
+
+	previous := ",,,,,,,,,"
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := vm.Set("val", tt.input)
+			require.NoError(t, err)
+
+			err = vm.Set("regexp", tt.regexp)
+			require.NoError(t, err)
+
+			val, err := vm.Run(`
+				var parts = [];
+				new RegExp(regexp).test(val);
+				parts.push(
+					RegExp.$_, RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4,
+					RegExp.$5, RegExp.$6, RegExp.$7, RegExp.$8, RegExp.$9
+				);
+				parts.join(",");
+			`)
+			require.NoError(t, err)
+
+			// If no match occurs the previous values will remain.
+			if tt.want == "" {
+				tt.want = previous
+			}
+			previous = tt.want
+
+			exp, err := val.Export()
+			require.NoError(t, err)
+			require.Equal(t, tt.want, exp)
+		})
+	}
+}
+
+func Test_issue252(t *testing.T) {
+	in := map[string]interface{}{
+		"attr": []interface{}{"string"},
+	}
+	expected := map[string]interface{}{
+		"attr": []string{"changed"},
+	}
+
+	vm := New()
+	err := vm.Set("In", in)
+	require.NoError(t, err)
+
+	result, err := vm.Run(`(function fn() {
+		var tmp = In;
+		tmp.attr = ["changed"];
+		return tmp;
+	})()`)
+	require.NoError(t, err)
+
+	actual, err := result.Export()
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+
+	expBs, err := json.Marshal(expected)
+	require.NoError(t, err)
+	actBs, err := json.Marshal(actual)
+	require.NoError(t, err)
+	require.Equal(t, expBs, actBs)
+}
+
+func Test_issue177(t *testing.T) {
+	vm := New()
+	val, err := vm.Run(`
+		var ii = 33;
+		var ret = [3, 2, 1].reduce(
+			function(pv, cv, ci, a) {
+				return pv + cv + ci;
+			}
+		);
+		ret;
+	`)
+	require.NoError(t, err)
+	exp, err := val.Export()
+	require.NoError(t, err)
+	require.Equal(t, float64(9), exp)
+}
+
+func Test_issue285(t *testing.T) {
+	vm := New()
+	val, err := vm.Run(`(1451).toLocaleString('en-US')`)
+	require.NoError(t, err)
+	exp, err := val.Export()
+	require.NoError(t, err)
+	require.Equal(t, "1,451", exp)
 }

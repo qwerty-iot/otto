@@ -1,14 +1,16 @@
 package otto
 
+import "github.com/davecgh/go-spew/spew"
+
 func builtinArrayBuffer(call FunctionCall) Value {
-	return toValue_object(builtinNewArrayBufferNative(call.runtime, call.ArgumentList))
+	return objectValue(builtinNewArrayBufferNative(call.runtime, call.ArgumentList))
 }
 
-func builtinNewArrayBuffer(self *_object, argumentList []Value) Value {
-	return toValue_object(builtinNewArrayBufferNative(self.runtime, argumentList))
+func builtinNewArrayBuffer(self *object, argumentList []Value) Value {
+	return objectValue(builtinNewArrayBufferNative(self.runtime, argumentList))
 }
 
-func builtinNewArrayBufferNative(runtime *_runtime, argumentList []Value) *_object {
+func builtinNewArrayBufferNative(runtime *runtime, argumentList []Value) *object {
 	if len(argumentList) == 1 {
 		firstArgument := argumentList[0]
 		if firstArgument.IsNumber() {
@@ -27,9 +29,11 @@ func builtinArrayBuffer_slice(call FunctionCall) Value {
 
 	if start >= end {
 		// Always an empty array
-		return toValue_object(call.runtime.newArrayBuffer(0))
+		return objectValue(call.runtime.newArrayBuffer(0))
 	}
 	buffer := thisObject.get("buffer").string()
 
-	return toValue_object(call.runtime.newArrayBufferOf(buffer[start:end]))
+	spew.Dump([]byte(buffer), start, end)
+
+	return objectValue(call.runtime.newArrayBufferOf(buffer[start:end]))
 }

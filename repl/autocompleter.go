@@ -18,12 +18,8 @@ func (a *autoCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	bits := strings.Split(lastExpression, ".")
 
-	first := bits[:len(bits)-1]
-	last := bits[len(bits)-1]
-
 	var l []string
-
-	if len(first) == 0 {
+	if first := bits[:len(bits)-1]; len(first) == 0 {
 		c := a.vm.Context()
 
 		l = make([]string, len(c.Symbols))
@@ -41,11 +37,12 @@ func (a *autoCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 		if o := r.Object(); o != nil {
 			for _, v := range o.KeysByParent() {
-				l = append(l, v...) // nolint: makezero
+				l = append(l, v...) //nolint: makezero
 			}
 		}
 	}
 
+	last := bits[len(bits)-1]
 	var r [][]rune
 	for _, s := range l {
 		if strings.HasPrefix(s, last) {

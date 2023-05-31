@@ -23,11 +23,6 @@ func TestValue(t *testing.T) {
 func TestObject(t *testing.T) {
 	tt(t, func() {
 		is(emptyValue.isEmpty(), true)
-		//is(newObject().Value(), "[object]")
-		//is(newBooleanObject(false).Value(), "false")
-		//is(newFunctionObject(nil).Value(), "[function]")
-		//is(newNumberObject(1).Value(), "1")
-		//is(newStringObject("Hello, World.").Value(), "Hello, World.")
 	})
 }
 
@@ -95,7 +90,7 @@ func TestToBoolean(t *testing.T) {
 		is("xyzzy", true)
 		is(1, true)
 		is(0, false)
-		//is(toValue(newObject()), true)
+
 		is(UndefinedValue(), false)
 		is(NullValue(), false)
 		is([]uint16{}, false)
@@ -115,7 +110,6 @@ func TestToFloat(t *testing.T) {
 			is(1, 1)
 			is(0, 0)
 			is(NullValue(), 0)
-			//is(newObjectValue(), math.NaN())
 		}
 		is(math.IsNaN(UndefinedValue().float64()), true)
 	})
@@ -268,14 +262,14 @@ func TestExport(t *testing.T) {
 			3.1459,
 			[]interface{}{true, false, 0, 3.1459, "abc"},
 			map[string]interface{}{
-				classBoolean: true,
-				classNumber:  3.1459,
-				classString:  "abc",
-				classArray:   []interface{}{false, 0, "", nil},
-				classObject: map[string]interface{}{
-					classBoolean: false,
-					classNumber:  0,
-					classString:  "def",
+				classBooleanName: true,
+				classNumberName:  3.1459,
+				classStringName:  "abc",
+				classArrayName:   []interface{}{false, 0, "", nil},
+				classObjectName: map[string]interface{}{
+					classBooleanName: false,
+					classNumberName:  0,
+					classStringName:  "def",
 				},
 			},
 		}
@@ -307,8 +301,79 @@ func TestExport(t *testing.T) {
 func Test_toReflectValue(t *testing.T) {
 	tt(t, func() {
 		value := toValue(0.0)
-		tmp, err := value.toReflectValue(reflect.Float32)
+		tmp, err := value.toReflectValue(reflect.TypeOf(0.0))
 		is(tmp.Float(), 0.0)
 		is(err, nil)
+	})
+}
+
+func TestJSONMarshaling(t *testing.T) {
+	tt(t, func() {
+		eval, tester := test()
+		toJSON := func(val interface{}) string {
+			j, err := json.Marshal(val)
+			is(err, nil)
+			return string(j)
+		}
+
+		is(toJSON(UndefinedValue()), `null`)
+		is(toJSON(NullValue()), `null`)
+		is(toJSON(FalseValue()), `false`)
+		is(toJSON(TrueValue()), `true`)
+
+		is(toJSON(toValue(0)), `0`)
+		is(toJSON(toValue(1234)), `1234`)
+		is(toJSON(toValue(1234.125)), `1234.125`)
+		is(toJSON(toValue(-1234)), `-1234`)
+		is(toJSON(toValue(-1234.125)), `-1234.125`)
+
+		is(toJSON(toValue("")), `""`)
+		is(toJSON(toValue("Otto")), `"Otto"`)
+		is(toJSON(eval(`String.fromCharCode(97,98,99,100,101,102)`)), `"abcdef"`)
+
+		is(toJSON(eval("[]")), `[]`)
+		is(toJSON(eval("[1, 2, 3]")), `[1,2,3]`)
+		is(toJSON(eval("new Array(1,2,3)")), `[1,2,3]`)
+
+		is(toJSON(eval(`({a:1, b:"hi", c:[true,false]})`)), `{"a":1,"b":"hi","c":[true,false]}`)
+
+		goArray := []string{"foo", "bar"}
+		val, _ := tester.vm.ToValue(goArray)
+		is(toJSON(val), `["foo","bar"]`)
+
+		goMap := map[string]interface{}{
+			"bar": []int{1, 2, 3},
+			"foo": 17,
+		}
+		val, _ = tester.vm.ToValue(goMap)
+		is(toJSON(val), `{"bar":[1,2,3],"foo":17}`)
+	})
+}
+
+func TestNestedJSONMarshaling(t *testing.T) {
+	tt(t, func() {
+		eval, _ := test()
+		toJSON := func(val interface{}) string {
+			j, err := json.Marshal(val)
+			is(err, nil)
+			return string(j)
+		}
+
+		goMap := map[string]interface{}{
+			"foo": 17,
+		}
+
+		fn := eval(`(function(obj) {obj.jsVal = "hi"; obj.jsArray = [17,true]; return obj;})`)
+		result, err := fn.Call(fn, goMap)
+		is(err, nil)
+		exported, err := result.Export()
+		is(err, nil)
+
+		is(toJSON(exported), `{"foo":17,"jsArray":[17,true],"jsVal":"hi"}`)
+
+		// Before MarshalJSON was implemented, this last assertion would fail:
+		// FAIL (==)
+		//      got: {"foo":17,"jsArray":{},"jsVal":"hi"}
+		// expected: {"foo":17,"jsArray":[17,true],"jsVal":"hi"}
 	})
 }

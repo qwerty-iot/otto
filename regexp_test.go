@@ -34,15 +34,15 @@ func TestRegExp(t *testing.T) {
 		test(`new RegExp("abc", "mig").toString()`, "/abc/gim")
 
 		result := test(`/(a)?/.exec('b')`, ",")
-		is(result._object().get("0"), "")
-		is(result._object().get("1"), "undefined")
-		is(result._object().get(propertyLength), 2)
+		is(result.object().get("0"), "")
+		is(result.object().get("1"), "undefined")
+		is(result.object().get(propertyLength), 2)
 
 		result = test(`/(a)?(b)?/.exec('b')`, "b,,b")
-		is(result._object().get("0"), "b")
-		is(result._object().get("1"), "undefined")
-		is(result._object().get("2"), "b")
-		is(result._object().get(propertyLength), 3)
+		is(result.object().get("0"), "b")
+		is(result.object().get("1"), "undefined")
+		is(result.object().get("2"), "b")
+		is(result.object().get(propertyLength), 3)
 
 		test(`/\u0041/.source`, "\\u0041")
 		test(`/\a/.source`, "\\a")
@@ -150,6 +150,11 @@ func TestRegExp_exec(t *testing.T) {
             var abc = /\w{3}\d?/.exec("CE\uFFFFL\uFFDDbox127");
             [ abc.input.length, abc.length, abc.input, abc.index, abc ];
         `, "11,1,CE\uFFFFL\uFFDDbox127,5,box1")
+
+		test(`
+        var abc = /\w{3}\d?/.exec("CE😋box127");
+        [ abc.input.length, abc.length, abc.input, abc.index, abc ];
+    `, "10,1,CE😋box127,4,box1")
 
 		test(`RegExp.prototype.exec.length`, 1)
 		test(`RegExp.prototype.exec.prototype`, "undefined")
@@ -271,13 +276,13 @@ func TestRegExp_controlCharacter(t *testing.T) {
 		test, _ := test()
 
 		for code := 0x41; code < 0x5a; code++ {
-			string_ := string(rune(code - 64))
+			val := string(rune(code - 64))
 			test(fmt.Sprintf(`
                 var code = 0x%x;
                 var string = String.fromCharCode(code %% 32);
                 var result = (new RegExp("\\c" + String.fromCharCode(code))).exec(string);
                 [ code, string, result ];
-            `, code), fmt.Sprintf("%d,%s,%s", code, string_, string_))
+            `, code), fmt.Sprintf("%d,%s,%s", code, val, val))
 		}
 	})
 }

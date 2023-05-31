@@ -1,22 +1,22 @@
 package otto
 
-func (runtime *_runtime) newArrayBufferObject(length uint32) *_object {
+func (runtime *runtime) newArrayBufferObject(length uint32) *object {
 	self := runtime.newObject()
 	self.class = "ArrayBuffer"
-	self.defineProperty("byteLength", toValue_uint32(length), 0100, false)
-	self.defineProperty("buffer", toValue_string(string(make([]byte, length))), 0100, false)
+	self.defineProperty("byteLength", uint32Value(length), 0100, false)
+	self.defineProperty("buffer", stringValue(string(make([]byte, length))), 0100, false)
 	return self
 }
 
-func (runtime *_runtime) newArrayBuffer(length uint32) *_object {
+func (runtime *runtime) newArrayBuffer(length uint32) *object {
 	self := runtime.newArrayBufferObject(length)
 	self.prototype = runtime.global.ArrayBufferPrototype
 	return self
 }
 
-func (runtime *_runtime) newArrayBufferOf(bytes string) *_object {
+func (runtime *runtime) newArrayBufferOf(bytes string) *object {
 	self := runtime.newArrayBuffer(uint32(len(bytes)))
-	self.defineProperty("buffer", toValue_string(bytes), 0111, false)
+	self.defineProperty("buffer", stringValue(bytes), 0111, false)
 	return self
 }
 

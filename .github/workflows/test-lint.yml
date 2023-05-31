@@ -1,24 +1,44 @@
 name: Go test and lint
 
 on:
-  push:
-    branches: '**'
+  pull_request:
+    branches: 'master'
 
 jobs:
   go-test-lint:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [1.19, 1.18]
+        golangcli: [v1.50.1]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: ${{ matrix.go }}
+          cache: true
 
-      - name: Test
-        run: go test -v ./...
+      - name: Validate go mod / generate
+        run: |
+          go mod tidy
+          go install golang.org/x/tools/cmd/stringer@latest
+          go generate ./...
+          git --no-pager diff && [[ 0 -eq $(git status --porcelain | wc -l) ]]
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+      - name: Go Lint
+        uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: ${{ matrix.golangci }}
+          args: "--out-${NO_FUTURE}format colored-line-number"
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+      - name: Go Build
+        run: go build ./...
+
+      - name: Go Test
+        run: go test -race -v ./...

@@ -14,7 +14,7 @@ func mockTimeLocal(location *time.Location) func() {
 	}
 }
 
-// Passing or failing should not be dependent on what time zone we're in
+// Passing or failing should not be dependent on what time zone we're in.
 func mockUTC() func() {
 	return mockTimeLocal(time.UTC)
 }
@@ -28,8 +28,12 @@ func TestDate(t *testing.T) {
 		time0 := time.Unix(1348616313, 47*1000*1000).Local()
 
 		test(`Date`, "function Date() { [native code] }")
-		test(`new Date(0).toUTCString()`, "Thu, 01 Jan 1970 00:00:00 UTC")
+		test(`new Date(0).toUTCString()`, "Thu, 01 Jan 1970 00:00:00 GMT")
 		test(`new Date(0).toGMTString()`, "Thu, 01 Jan 1970 00:00:00 GMT")
+		test(`new Date('2023').toGMTString()`, "Sun, 01 Jan 2023 00:00:00 GMT")
+		test(`new Date('2023/02').toGMTString()`, "Wed, 01 Feb 2023 00:00:00 GMT")
+		test(`new Date('2023/02/23').toGMTString()`, "Thu, 23 Feb 2023 00:00:00 GMT")
+		test(`new Date('2023/02/23 11:23:57').toGMTString()`, "Thu, 23 Feb 2023 11:23:57 GMT")
 		if false {
 			// TODO toLocale{Date,Time}String
 			test(`new Date(0).toLocaleString()`, "")
@@ -37,8 +41,8 @@ func TestDate(t *testing.T) {
 			test(`new Date(0).toLocaleTimeString()`, "")
 		}
 		test(`new Date(1348616313).getTime()`, 1348616313)
-		test(`new Date(1348616313).toUTCString()`, "Fri, 16 Jan 1970 14:36:56 UTC")
-		test(`abc = new Date(1348616313047); abc.toUTCString()`, "Tue, 25 Sep 2012 23:38:33 UTC")
+		test(`new Date(1348616313).toUTCString()`, "Fri, 16 Jan 1970 14:36:56 GMT")
+		test(`abc = new Date(1348616313047); abc.toUTCString()`, "Tue, 25 Sep 2012 23:38:33 GMT")
 		test(`abc.getYear()`, time0.Year()-1900)
 		test(`abc.getFullYear()`, time0.Year())
 		test(`abc.getUTCFullYear()`, 2012)
@@ -61,42 +65,40 @@ func TestDate(t *testing.T) {
 
 		test(`new Date("Xyzzy").getTime()`, math.NaN())
 
-		test(`abc.setFullYear(2011); abc.toUTCString()`, "Sun, 25 Sep 2011 23:38:33 UTC")
-		test(`new Date(12564504e5).toUTCString()`, "Sun, 25 Oct 2009 06:00:00 UTC")
-		test(`new Date(2009, 9, 25).toUTCString()`, "Sun, 25 Oct 2009 00:00:00 UTC")
-		test(`+(new Date(2009, 9, 25))`, 1256428800000)
+		test(`abc.setFullYear(2011); abc.toUTCString()`, "Sun, 25 Sep 2011 23:38:33 GMT")
+		test(`new Date(12564504e5).toUTCString()`, "Sun, 25 Oct 2009 06:00:00 GMT")
+		test(`new Date(2009, 9, 25).toUTCString()`, "Sun, 25 Oct 2009 00:00:00 GMT")
+		test(`+(new Date(2009, 9, 25))`, int64(1256428800000))
 
 		format := "Mon, 2 Jan 2006 15:04:05 MST"
 
 		time1 := time.Unix(1256450400, 0)
-		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
-
-		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), 2001*1000*1000, time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), 2001*1000*1000, time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setMilliseconds(2001); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), 61, time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), 61, time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setSeconds("61"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), 61, time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), time1.Hour(), 61, time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setMinutes("61"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), 5, time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), time1.Month(), time1.Day(), 5, time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setHours("5"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), time1.Month(), 26, time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), time1.Month(), 26, time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setDate("26"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), 10, time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), 10, time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setMonth(9); abc.toUTCString()`, time0.Format(format))
 		test(`abc = new Date(12564504e5); abc.setMonth("09"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(time1.Year(), 11, time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(time1.Year(), 11, time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setMonth("10"); abc.toUTCString()`, time0.Format(format))
 
-		time0 = time.Date(2010, time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).UTC()
+		time0 = time.Date(2010, time1.Month(), time1.Day(), time1.Hour(), time1.Minute(), time1.Second(), time1.Nanosecond(), time1.Location()).In(utcTimeZone)
 		test(`abc = new Date(12564504e5); abc.setFullYear(2010); abc.toUTCString()`, time0.Format(format))
 
-		test(`new Date("2001-01-01T10:01:02.000").getTime()`, 978343262000)
+		test(`new Date("2001-01-01T10:01:02.000").getTime()`, int64(978343262000))
 
 		// Date()
 		test(`typeof Date()`, "string")
@@ -126,11 +128,11 @@ func TestDate_parse(t *testing.T) {
 
 		defer mockUTC()()
 
-		test(`Date.parse("2001-01-01T10:01:02.000")`, 978343262000)
+		test(`Date.parse("2001-01-01T10:01:02.000")`, int64(978343262000))
 
-		test(`Date.parse("2006-01-02T15:04:05.000")`, 1136214245000)
+		test(`Date.parse("2006-01-02T15:04:05.000")`, int64(1136214245000))
 
-		test(`Date.parse("2006")`, 1136073600000)
+		test(`Date.parse("2006")`, int64(1136073600000))
 
 		test(`Date.parse("1970-01-16T14:36:56+00:00")`, 1348616000)
 
@@ -148,7 +150,7 @@ func TestDate_UTC(t *testing.T) {
 
 		defer mockUTC()()
 
-		test(`Date.UTC(2009, 9, 25)`, 1256428800000)
+		test(`Date.UTC(2009, 9, 25)`, int64(1256428800000))
 
 		test(`Date.UTC.length`, 7)
 	})
@@ -193,11 +195,11 @@ func TestDate_setYear(t *testing.T) {
 
 		defer mockUTC()()
 
-		test(`new Date(12564504e5).setYear(96)`, 846223200000)
+		test(`new Date(12564504e5).setYear(96)`, int64(846223200000))
 
-		test(`new Date(12564504e5).setYear(1996)`, 846223200000)
+		test(`new Date(12564504e5).setYear(1996)`, int64(846223200000))
 
-		test(`new Date(12564504e5).setYear(2000)`, 972453600000)
+		test(`new Date(12564504e5).setYear(2000)`, int64(972453600000))
 	})
 }
 

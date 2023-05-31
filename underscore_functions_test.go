@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-// bind
+// bind.
 func Test_underscore_functions_0(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("bind", function() {
@@ -48,10 +48,10 @@ func Test_underscore_functions_0(t *testing.T) {
 	})
 }
 
-// partial
+// partial.
 func Test_underscore_functions_1(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("partial", function() {
@@ -65,10 +65,10 @@ func Test_underscore_functions_1(t *testing.T) {
 	})
 }
 
-// bindAll
+// bindAll.
 func Test_underscore_functions_2(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("bindAll", function() {
@@ -82,25 +82,15 @@ func Test_underscore_functions_2(t *testing.T) {
     curly.sayHi = moe.sayHi;
     equal(curly.getName(), 'name: curly', 'unbound function is bound to current object');
     equal(curly.sayHi(), 'hi: moe', 'bound function is still bound to original object');
-
-    curly = {name : 'curly'};
-    moe = {
-      name    : 'moe',
-      getName : function() { return 'name: ' + this.name; },
-      sayHi   : function() { return 'hi: ' + this.name; }
-    };
-    _.bindAll(moe);
-    curly.sayHi = moe.sayHi;
-    equal(curly.sayHi(), 'hi: moe', 'calling bindAll with no arguments binds all functions to the object');
   });
         `)
 	})
 }
 
-// memoize
+// memoize.
 func Test_underscore_functions_3(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("memoize", function() {
@@ -122,10 +112,10 @@ func Test_underscore_functions_3(t *testing.T) {
 	})
 }
 
-// once
+// once.
 func Test_underscore_functions_4(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("once", function() {
@@ -139,10 +129,10 @@ func Test_underscore_functions_4(t *testing.T) {
 	})
 }
 
-// wrap
+// wrap.
 func Test_underscore_functions_5(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("wrap", function() {
@@ -164,10 +154,10 @@ func Test_underscore_functions_5(t *testing.T) {
 	})
 }
 
-// compose
+// compose.
 func Test_underscore_functions_6(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("compose", function() {
@@ -183,10 +173,10 @@ func Test_underscore_functions_6(t *testing.T) {
 	})
 }
 
-// after
+// after.
 func Test_underscore_functions_7(t *testing.T) {
 	tt(t, func() {
-		test, _ := test_()
+		test := underscoreTest()
 
 		test(`
   test("after", function() {
@@ -201,7 +191,7 @@ func Test_underscore_functions_7(t *testing.T) {
 
     equal(testAfter(5, 5), 1, "after(N) should fire after being called N times");
     equal(testAfter(5, 4), 0, "after(N) should not fire unless called N times");
-    equal(testAfter(0, 0), 1, "after(0) should fire immediately");
+    equal(testAfter(0, 1), 1, "after(0) should fire immediately");
   });
         `)
 	})

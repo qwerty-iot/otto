@@ -14,8 +14,8 @@ func Test_cmpl(t *testing.T) {
 			program, err := parser.ParseFile(nil, "", src, 0)
 			is(err, nil)
 			{
-				program := cmpl_parse(program)
-				value := vm.runtime.cmpl_evaluate_nodeProgram(program, false)
+				program := cmplParse(program)
+				value := vm.runtime.cmplEvaluateNodeProgram(program, false)
 				if len(expect) > 0 {
 					is(value, expect[0])
 				}
@@ -34,11 +34,10 @@ func Test_cmpl(t *testing.T) {
 
 func TestParse_cmpl(t *testing.T) {
 	tt(t, func() {
-
 		test := func(src string) {
 			program, err := parser.ParseFile(nil, "", src, 0)
 			is(err, nil)
-			is(cmpl_parse(program), "!=", nil)
+			is(cmplParse(program), "!=", nil)
 		}
 
 		test(``)
