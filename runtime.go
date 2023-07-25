@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/robertkrimen/otto/ast"
 	"github.com/robertkrimen/otto/parser"
@@ -696,6 +697,9 @@ func (rt *runtime) toValue(value interface{}) Value {
 				return objectValue(rt.newGoArray(val))
 			}
 		case reflect.Struct:
+			if val.Type().Name() == "Time" {
+				return objectValue(rt.newDate(float64(val.Interface().(time.Time).UnixMilli())))
+			}
 			return objectValue(rt.newGoStructObject(val))
 		case reflect.Map:
 			return objectValue(rt.newGoMapObject(val))
