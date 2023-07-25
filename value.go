@@ -637,6 +637,8 @@ func (v Value) export() interface{} {
 			return value.value.Interface()
 		case *goSliceObject:
 			return value.value.Interface()
+		case dateObject:
+			return value.time
 		}
 		if obj.class == classArrayName {
 			result := make([]interface{}, 0)
