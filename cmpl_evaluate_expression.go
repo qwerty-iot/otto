@@ -21,6 +21,10 @@ func (rt *runtime) cmplEvaluateNodeExpression(node nodeExpression) Value {
 		default:
 		}
 	}
+	rt.otto.execCount++
+	if rt.otto.execLimit != 0 && rt.otto.execCount > rt.otto.execLimit {
+		panic(hereBeDragons("execution-limit-reached"))
+	}
 
 	switch node := node.(type) {
 	case *nodeArrayLiteral:

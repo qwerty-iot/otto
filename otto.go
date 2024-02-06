@@ -234,6 +234,8 @@ type Otto struct {
 	// Interrupt is a channel for interrupting the runtime. You can use this to halt a long running execution, for example.
 	// See "Halting Problem" for more information.
 	Interrupt chan func()
+	execCount int64
+	execLimit int64
 	runtime   *runtime
 }
 
@@ -276,6 +278,7 @@ func (o *Otto) clone() *Otto {
 // src may also be a Program, but if the AST has been modified, then runtime behavior is undefined.
 func Run(src interface{}) (*Otto, Value, error) {
 	otto := New()
+	otto.execCount = 0
 	value, err := otto.Run(src) // This already does safety checking
 	return otto, value, err
 }
@@ -291,6 +294,7 @@ func Run(src interface{}) (*Otto, Value, error) {
 //
 // src may also be a Program, but if the AST has been modified, then runtime behavior is undefined.
 func (o Otto) Run(src interface{}) (Value, error) {
+	o.execCount = 0
 	value, err := o.runtime.cmplRun(src, nil)
 	if !value.safe() {
 		value = Value{}
@@ -308,6 +312,7 @@ func (o Otto) Eval(src interface{}) (Value, error) {
 		o.runtime.enterGlobalScope()
 		defer o.runtime.leaveScope()
 	}
+	o.execCount = 0
 
 	value, err := o.runtime.cmplEval(src, nil)
 	if !value.safe() {
@@ -367,6 +372,14 @@ func (o Otto) SetDebuggerHandler(fn func(vm *Otto)) {
 // SetRandomSource sets the random source to fn.
 func (o Otto) SetRandomSource(fn func() float64) {
 	o.runtime.random = fn
+}
+
+func (o Otto) SetExecLimit(limit int64) {
+	o.execLimit = limit
+}
+
+func (o Otto) GetExecCount() int64 {
+	return o.execCount
 }
 
 // SetStackDepthLimit sets an upper limit to the depth of the JavaScript
