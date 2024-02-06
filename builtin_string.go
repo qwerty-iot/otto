@@ -443,6 +443,31 @@ func builtinStringSubstr(call FunctionCall) Value {
 	return stringValue(string(target[start : start+length]))
 }
 
+func builtinStringStartsWith(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	target := call.This.string()
+	search := call.Argument(0).string()
+	length := len(search)
+	if length > len(target) {
+		return boolValue(false)
+	}
+	return boolValue(target[:length] == search)
+}
+
+func builtinStringEndsWith(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	value := call.This.string()
+	target := call.Argument(0).string()
+	return boolValue(strings.HasSuffix(value, target))
+}
+
+func builtinStringIncludes(call FunctionCall) Value {
+	checkObjectCoercible(call.runtime, call.This)
+	value := call.This.string()
+	target := call.Argument(0).string()
+	return boolValue(strings.Contains(value, target))
+}
+
 func builtinStringToLowerCase(call FunctionCall) Value {
 	checkObjectCoercible(call.runtime, call.This)
 	return stringValue(strings.ToLower(call.This.string()))
@@ -460,6 +485,14 @@ func builtinStringTrim(call FunctionCall) Value {
 	checkObjectCoercible(call.runtime, call.This)
 	return toValue(strings.Trim(call.This.string(),
 		builtinStringTrimWhitespace))
+}
+
+func builtinStringTrimStart(call FunctionCall) Value {
+	return builtinStringTrimLeft(call)
+}
+
+func builtinStringTrimEnd(call FunctionCall) Value {
+	return builtinStringTrimRight(call)
 }
 
 // Mozilla extension, not ECMAScript 5.
@@ -494,25 +527,4 @@ func builtinStringToLocaleLowerCase(call FunctionCall) Value {
 
 func builtinStringToLocaleUpperCase(call FunctionCall) Value {
 	return builtinStringToUpperCase(call)
-}
-
-func builtinString_startsWith(call FunctionCall) Value {
-	checkObjectCoercible(call.runtime, call.This)
-	value := call.This.string()
-	target := call.Argument(0).string()
-	return boolValue(strings.HasPrefix(value, target))
-}
-
-func builtinString_endsWith(call FunctionCall) Value {
-	checkObjectCoercible(call.runtime, call.This)
-	value := call.This.string()
-	target := call.Argument(0).string()
-	return boolValue(strings.HasSuffix(value, target))
-}
-
-func builtinString_includes(call FunctionCall) Value {
-	checkObjectCoercible(call.runtime, call.This)
-	value := call.This.string()
-	target := call.Argument(0).string()
-	return boolValue(strings.Contains(value, target))
 }
