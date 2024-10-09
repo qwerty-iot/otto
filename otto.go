@@ -233,10 +233,12 @@ import (
 type Otto struct {
 	// Interrupt is a channel for interrupting the runtime. You can use this to halt a long running execution, for example.
 	// See "Halting Problem" for more information.
-	Interrupt chan func()
-	execCount int64
-	execLimit int64
-	runtime   *runtime
+	Interrupt  chan func()
+	execCount  int64
+	execLimit  int64
+	execWarn   int64
+	execWarnCb func()
+	runtime    *runtime
 }
 
 // New will allocate a new JavaScript runtime.
@@ -374,8 +376,13 @@ func (o Otto) SetRandomSource(fn func() float64) {
 	o.runtime.random = fn
 }
 
-func (o Otto) SetExecLimit(limit int64) {
+func (o *Otto) SetExecLimit(limit int64) {
 	o.execLimit = limit
+}
+
+func (o *Otto) SetExecWarn(warn int64, cb func()) {
+	o.execWarn = warn
+	o.execWarnCb = cb
 }
 
 func (o Otto) GetExecCount() int64 {

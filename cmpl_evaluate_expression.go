@@ -22,8 +22,12 @@ func (rt *runtime) cmplEvaluateNodeExpression(node nodeExpression) Value {
 		}
 	}
 	rt.otto.execCount++
+	if rt.otto.execWarn != 0 && rt.otto.execCount > rt.otto.execWarn {
+		rt.otto.execWarn = 0
+		rt.otto.execWarnCb()
+	}
 	if rt.otto.execLimit != 0 && rt.otto.execCount > rt.otto.execLimit {
-		panic(hereBeDragons("execution-limit-reached"))
+		panic("execution-limit-reached")
 	}
 
 	switch node := node.(type) {
