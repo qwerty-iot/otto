@@ -8,6 +8,11 @@ import (
 	"github.com/robertkrimen/otto/token"
 )
 
+type PanicExecutionLimit struct {
+	Msg     string
+	Context Context
+}
+
 func (rt *runtime) cmplEvaluateNodeExpression(node nodeExpression) Value {
 	// Allow interpreter interruption
 	// If the Interrupt channel is nil, then
@@ -27,7 +32,7 @@ func (rt *runtime) cmplEvaluateNodeExpression(node nodeExpression) Value {
 		rt.otto.execWarnCb()
 	}
 	if rt.otto.execLimit != 0 && rt.otto.execCount > rt.otto.execLimit {
-		panic("execution-limit-reached")
+		panic(PanicExecutionLimit{Msg: "execution-limit-reached", Context: rt.otto.Context()})
 	}
 
 	switch node := node.(type) {
